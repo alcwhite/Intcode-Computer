@@ -74,7 +74,7 @@ namespace intcode_computer
                     return x == 0 ? intList[intList[currentIndex + i + 1]] : intList[currentIndex + i + 1];
                 }).ToList();
                 int outputValue = 0;
-                int pointerLocation = currentIndex;
+                int? pointerLocation = null;
                 if (op == "ADD")
                     outputValue = parameterValues[0] + parameterValues[1];
                 if (op == "MULTIPLY")
@@ -84,25 +84,25 @@ namespace intcode_computer
                 if (op == "OUTPUT")
                     outputValue = parameterValues[0];
                 if (op == "JUMP-IF-TRUE")
-                    if (parameterValues[0] != 0) pointerLocation = intList[currentIndex + 1];
+                    if (parameterValues[0] != 0) pointerLocation = parameterValues[1];
                 if (op == "JUMP-IF-FALSE")
-                    if (parameterValues[0] == 0) pointerLocation = intList[currentIndex + 1];
+                    if (parameterValues[0] == 0) pointerLocation = parameterValues[1];
                 if (op == "LESS THAN")
                     outputValue = parameterValues[0] < parameterValues[1] ? 1 : 0;
                 if (op == "EQUALS")
                     outputValue = parameterValues[0] == parameterValues[1] ? 1 : 0;
                
-                if (pointerLocation != currentIndex)
+                if (!pointerLocation.HasValue)
                 {
                     var outputLocation = intList[currentIndex + parameterCount - 1];
                     if (op == "OUTPUT") outputs.Add(outputValue);
-                    if (op != "OUTPUT") intList[outputLocation] = outputValue;
+                    if (op != "OUTPUT" && op != "JUMP-IF-FALSE" && op != "JUMP-IF-TRUE") intList[outputLocation] = outputValue;
                     
                     currentIndex += parameterCount; 
                 }
                 else
                 {
-                    currentIndex = pointerLocation;
+                    currentIndex = (int)pointerLocation;
                 }
                 
                 currentCode = intList[currentIndex];
