@@ -1,5 +1,4 @@
 using Xunit;
-using System.Collections.Generic;
 using System.Text;
 using System.IO;
 
@@ -45,8 +44,6 @@ public class Day5Test
         Assert.Equal(999, intcode_computer.IntcodeComputer.RunComputer(input, input1).outputs[0]);
         Assert.Equal(1000, intcode_computer.IntcodeComputer.RunComputer(input, input2).outputs[0]);
         Assert.Equal(1001, intcode_computer.IntcodeComputer.RunComputer(input, input3).outputs[0]);
-
-
     }
     [Fact]
     public void Part2_Puzzle()
