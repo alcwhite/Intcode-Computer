@@ -82,7 +82,7 @@ namespace intcode_computer
                 if (op == "SAVE")
                     outputValue = id;
                 if (op == "OUTPUT")
-                    outputValue = parameterValues[0];
+                    outputs.Add(parameterValues[0]);
                 if (op == "JUMP-IF-TRUE")
                     if (parameterValues[0] != 0) pointerLocation = parameterValues[1];
                 if (op == "JUMP-IF-FALSE")
@@ -95,7 +95,6 @@ namespace intcode_computer
                 if (!pointerLocation.HasValue)
                 {
                     var outputLocation = intList[currentIndex + parameterCount - 1];
-                    if (op == "OUTPUT") outputs.Add(outputValue);
                     if (op != "OUTPUT" && op != "JUMP-IF-FALSE" && op != "JUMP-IF-TRUE") intList[outputLocation] = outputValue;
                     
                     currentIndex += parameterCount; 
