@@ -2,6 +2,7 @@ using Xunit;
 using System.Text;
 using System.IO;
 using System.Linq;
+using System.Collections.Generic;
 
 public class Day2Test
 {
@@ -25,27 +26,27 @@ public class Day2Test
     [Fact]
     public void Part1_Test_1()
     {
-        Assert.Equal(testResult1, intcode_computer.IntcodeComputer.RunComputer(testInput1, 0).result[0]);
+        Assert.Equal(testResult1, intcode_computer.IntcodeComputer.RunComputer(testInput1, new List<int>(){0}).result[0]);
     }
     [Fact]
     public void Part1_Test_2()
     {
-        Assert.Equal(testResult2, intcode_computer.IntcodeComputer.RunComputer(testInput2, 0).result[0]);
+        Assert.Equal(testResult2, intcode_computer.IntcodeComputer.RunComputer(testInput2, new List<int>(){0}).result[0]);
     }
     [Fact]
     public void Part1_Test_3()
     {
-        Assert.Equal(testResult3, intcode_computer.IntcodeComputer.RunComputer(testInput3, 0).result[0]);
+        Assert.Equal(testResult3, intcode_computer.IntcodeComputer.RunComputer(testInput3, new List<int>(){0}).result[0]);
     }
     [Fact]
     public void Part1_Test_4()
     {
-        Assert.Equal(testResult4, intcode_computer.IntcodeComputer.RunComputer(testInput4, 0).result[0]);
+        Assert.Equal(testResult4, intcode_computer.IntcodeComputer.RunComputer(testInput4, new List<int>(){0}).result[0]);
     }
     [Fact]
     public void Part1_Test_5()
     {
-        Assert.Equal(testResult5, intcode_computer.IntcodeComputer.RunComputer(testInput5, 0).result[0]);
+        Assert.Equal(testResult5, intcode_computer.IntcodeComputer.RunComputer(testInput5, new List<int>(){0}).result[0]);
     }
     [Fact]
     public void Part1_Puzzle()
@@ -54,19 +55,19 @@ public class Day2Test
         listInput[1] = 12.ToString();
         listInput[2] = 2.ToString();
         var input = string.Join(",", listInput);
-        var result = intcode_computer.IntcodeComputer.RunComputer(input, 0);
+        var result = intcode_computer.IntcodeComputer.RunComputer(input, new List<int>(){0});
         Assert.Equal(9706670, result.result[0]);
     }
     [Fact]
     public void Part2_Puzzle_Test()
     {
-        var result = intcode_computer.IntcodeComputer.RunForOutput(puzzleInput, 19690720, 0);
+        var result = intcode_computer.IntcodeComputer.RunForOutput(puzzleInput, 19690720, new List<int>(){0});
         Assert.Equal(19690720, result[0]);
     }
     [Fact]
     public void Part2_Puzzle()
     {
-        var result = intcode_computer.IntcodeComputer.RunForOutput(puzzleInput, 19690720, 0);
+        var result = intcode_computer.IntcodeComputer.RunForOutput(puzzleInput, 19690720, new List<int>(){0});
 
         Assert.Equal(2552, (100 * result[1]) + result[2]);
     }
