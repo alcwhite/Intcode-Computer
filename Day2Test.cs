@@ -2,6 +2,7 @@ using Xunit;
 using System.Text;
 using System.IO;
 using System.Linq;
+using System.Collections.Generic;
 
 public class Day2Test
 {
@@ -25,27 +26,42 @@ public class Day2Test
     [Fact]
     public void Part1_Test_1()
     {
-        Assert.Equal(testResult1, intcode_computer.IntcodeComputer.RunComputer(testInput1, 0).result[0]);
+        var result = intcode_computer.IntcodeComputer.RunComputer(testInput1, 0);
+        var resultInStrings = result.result.Select(x => x.ToString());
+        Assert.Equal(testOutput1, string.Join(',', resultInStrings));
+        Assert.Equal(testResult1, result.result[0]);
     }
     [Fact]
     public void Part1_Test_2()
     {
-        Assert.Equal(testResult2, intcode_computer.IntcodeComputer.RunComputer(testInput2, 0).result[0]);
+        var result = intcode_computer.IntcodeComputer.RunComputer(testInput2, 0);
+        var resultInStrings = result.result.Select(x => x.ToString());
+        Assert.Equal(testOutput2, string.Join(',', resultInStrings));
+        Assert.Equal(testResult2, result.result[0]);
     }
     [Fact]
     public void Part1_Test_3()
     {
-        Assert.Equal(testResult3, intcode_computer.IntcodeComputer.RunComputer(testInput3, 0).result[0]);
+        var result = intcode_computer.IntcodeComputer.RunComputer(testInput3, 0);
+        var resultInStrings = result.result.Select(x => x.ToString());
+        Assert.Equal(testOutput3, string.Join(',', resultInStrings));
+        Assert.Equal(testResult3, result.result[0]);
     }
     [Fact]
     public void Part1_Test_4()
     {
-        Assert.Equal(testResult4, intcode_computer.IntcodeComputer.RunComputer(testInput4, 0).result[0]);
+       var result = intcode_computer.IntcodeComputer.RunComputer(testInput4, 0);
+        var resultInStrings = result.result.Select(x => x.ToString());
+        Assert.Equal(testOutput4, string.Join(',', resultInStrings));
+        Assert.Equal(testResult4, result.result[0]);
     }
     [Fact]
     public void Part1_Test_5()
     {
-        Assert.Equal(testResult5, intcode_computer.IntcodeComputer.RunComputer(testInput5, 0).result[0]);
+        var result = intcode_computer.IntcodeComputer.RunComputer(testInput5, 0);
+        var resultInStrings = result.result.Select(x => x.ToString());
+        Assert.Equal(testOutput5, string.Join(',', resultInStrings));
+        Assert.Equal(testResult5, result.result[0]);
     }
     [Fact]
     public void Part1_Puzzle()
