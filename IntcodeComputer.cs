@@ -145,23 +145,22 @@ namespace intcode_computer
             return finalList;
         }
 
-        public static List<List<int>> SignalPermutations()
+        public static HashSet<List<int>> SignalPermutations()
         {
 
             var count = phaseSettingOptions.Count;
             var permutationCount = 1;
-            var allOptions = new List<List<int>>(){phaseSettingOptions};
+            var allOptions = new HashSet<List<int>>(){phaseSettingOptions};
             var currentIndex = 0;
             var currentNumber = phaseSettingOptions[0];
-
+            var lastOption = phaseSettingOptions;
             while (count > 1)
             {
                 permutationCount *= count;
                 count--;
             }
             while (allOptions.Count < permutationCount)
-            {
-                var lastOption = allOptions[allOptions.Count - 1];
+            { 
                 var thisOption = new List<int>();
                 lastOption.ForEach(x => thisOption.Add(x));
                 var nextIndex = currentIndex < phaseSettingOptions.Count - 1 ? currentIndex + 1 : 0;
@@ -170,6 +169,7 @@ namespace intcode_computer
                 thisOption[nextIndex] = currentNumber;
                 thisOption[currentIndex] = nextNumber;
                 allOptions.Add(thisOption);
+                lastOption = thisOption;
                 currentIndex = nextIndex;
             }
             return allOptions;
@@ -179,7 +179,8 @@ namespace intcode_computer
         {
             var allSignals = new List<(List<int> order, int signal)>();
             var allSettingOrders = SignalPermutations();
-            allSettingOrders.ForEach(settingOrder => {
+            foreach (var settingOrder in allSettingOrders) 
+            {
                 var lastOutput = 0;
                 settingOrder.ForEach(currentSetting => {
                 var input = new List<int>(){currentSetting, lastOutput};
@@ -189,7 +190,7 @@ namespace intcode_computer
                 });
                 var signalInfo = (settingOrder, lastOutput);
                 allSignals.Add(signalInfo);
-            });           
+            };           
             var justSignals = new List<int>();
             allSignals.ForEach(x => justSignals.Add(x.signal));
             Console.WriteLine(justSignals);

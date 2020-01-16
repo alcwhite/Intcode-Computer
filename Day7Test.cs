@@ -26,10 +26,13 @@ public class Day7Test
     public void Permutations_Test()
     {
         var result = intcode_computer.IntcodeComputer.SignalPermutations();
-        var resultCounts = new List<int>();
-        result.ForEach(x => resultCounts.Add(x.Distinct().Count()));
+        var resultCount = new List<int>();
+        foreach (var thisResult in result)
+        {
+            resultCount.Add(thisResult.Distinct().Count());
+        }
         Assert.Equal(120, result.Count);
         Assert.Equal(120, result.Distinct().Count());
-        Assert.Equal(1, resultCounts.Distinct().Count());
+        Assert.Equal(1, resultCount.Distinct().Count());
     }
 }
