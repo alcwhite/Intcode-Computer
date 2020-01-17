@@ -55,6 +55,34 @@ namespace intcode_computer
             parameterTypeList.Reverse();
             return parameterTypeList;
         }
+        private class Calculate
+        {
+            public int? pointerLocation;
+            public int outputValue;
+            public List<int> outputs;
+
+            public Calculate(List<int> parameterValues, string op, int id, List<int> outputs)
+            {
+                this.outputs = outputs;
+                if (op == "ADD")
+                    outputValue = parameterValues[0] + parameterValues[1];
+                if (op == "MULTIPLY")
+                    outputValue = parameterValues[0] * parameterValues[1];
+                if (op == "SAVE")
+                    outputValue = id;
+                if (op == "OUTPUT")
+                    this.outputs.Add(parameterValues[0]);
+                if (op == "JUMP-IF-TRUE")
+                    if (parameterValues[0] != 0) pointerLocation = parameterValues[1];
+                if (op == "JUMP-IF-FALSE")
+                    if (parameterValues[0] == 0) pointerLocation = parameterValues[1];
+                if (op == "LESS THAN")
+                    outputValue = parameterValues[0] < parameterValues[1] ? 1 : 0;
+                if (op == "EQUALS")
+                    outputValue = parameterValues[0] == parameterValues[1] ? 1 : 0;
+            }
+               
+        }
         public static (List<int> result, List<int> outputs) RunComputer(string input, int id)
         {
             var intList = IntList(input);
@@ -72,30 +100,15 @@ namespace intcode_computer
                 {
                     return x == 0 ? intList[intList[currentIndex + i + 1]] : intList[currentIndex + i + 1];
                 }).ToList();
-                int outputValue = 0;
-                int? pointerLocation = null;
-                if (op == "ADD")
-                    outputValue = parameterValues[0] + parameterValues[1];
-                if (op == "MULTIPLY")
-                    outputValue = parameterValues[0] * parameterValues[1];
-                if (op == "SAVE")
-                    outputValue = id;
-                if (op == "OUTPUT")
-                    outputs.Add(parameterValues[0]);
-                if (op == "JUMP-IF-TRUE")
-                    if (parameterValues[0] != 0) pointerLocation = parameterValues[1];
-                if (op == "JUMP-IF-FALSE")
-                    if (parameterValues[0] == 0) pointerLocation = parameterValues[1];
-                if (op == "LESS THAN")
-                    outputValue = parameterValues[0] < parameterValues[1] ? 1 : 0;
-                if (op == "EQUALS")
-                    outputValue = parameterValues[0] == parameterValues[1] ? 1 : 0;
-               
+                var values = new Calculate(parameterValues, op, id, outputs); 
+                int outputValue = values.outputValue;
+                int? pointerLocation = values.pointerLocation;
+                outputs = values.outputs;
+                
                 if (!pointerLocation.HasValue)
                 {
                     var outputLocation = intList[currentIndex + parameterCount];
-                    if (op != "OUTPUT" && op != "JUMP-IF-FALSE" && op != "JUMP-IF-TRUE") intList[outputLocation] = outputValue;
-                    
+                    if (op != "OUTPUT" && op != "JUMP-IF-FALSE" && op != "JUMP-IF-TRUE") intList[outputLocation] = outputValue;       
                     currentIndex += parameterCount + 1; 
                 }
                 else
