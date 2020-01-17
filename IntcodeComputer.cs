@@ -18,17 +18,16 @@ namespace intcode_computer
             {8, "EQUALS"},
             {99, "END"}
         };
-        // technically these are parameterCounts + 1 -- but elsewhere compensates
         static Dictionary<int, int> parameterCounts = new Dictionary<int, int>()
         {
-            {1, 4},
-            {2, 4},
-            {3, 2},
-            {4, 2},
-            {5, 3},
-            {6, 3},
-            {7, 4},
-            {8, 4},
+            {1, 3},
+            {2, 3},
+            {3, 1},
+            {4, 1},
+            {5, 2},
+            {6, 2},
+            {7, 3},
+            {8, 3},
             {99, 0}
         };
         private static List<int> IntList(string input)
@@ -48,7 +47,7 @@ namespace intcode_computer
         {
             var codeString = fullCode.ToString();
             var parameterTypeList = codeString.Length > 2 ? codeString.Substring(0, codeString.Length - 2).ToList().Select(x => int.Parse(x.ToString())).ToList() : new List<int>();
-            while (parameterTypeList.Count < parameterCount - 1)
+            while (parameterTypeList.Count < parameterCount)
             {
                 parameterTypeList.Insert(0, 0);
             }
@@ -94,10 +93,10 @@ namespace intcode_computer
                
                 if (!pointerLocation.HasValue)
                 {
-                    var outputLocation = intList[currentIndex + parameterCount - 1];
+                    var outputLocation = intList[currentIndex + parameterCount];
                     if (op != "OUTPUT" && op != "JUMP-IF-FALSE" && op != "JUMP-IF-TRUE") intList[outputLocation] = outputValue;
                     
-                    currentIndex += parameterCount; 
+                    currentIndex += parameterCount + 1; 
                 }
                 else
                 {
