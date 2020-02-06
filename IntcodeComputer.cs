@@ -36,10 +36,10 @@ namespace intcode_computer
             var stringList = input.Split(',').ToList();
             return stringList.Select(x => int.Parse(x.Trim())).ToList();
         }
-        private static OpCode GetOpCode(int fullCode)
+        private static OpCode GetOpCode(int fullCode, string codeString)
         {
-           return fullCode.ToString().Length < 3 ? (OpCode)fullCode : 
-                    (OpCode)int.Parse(fullCode.ToString().Substring(fullCode.ToString().Length - 2));
+            return (OpCode)(codeString.Length < 3 ? fullCode : 
+                    int.Parse(codeString.Substring(codeString.Length - 2)));
         }
         private static List<int> GetParameterTypes(int fullCode, int parameterCount)
         {
@@ -86,7 +86,7 @@ namespace intcode_computer
             var intList = IntList(input);
             var outputs = new List<int>();
             int currentCode = intList[0];
-            var currentOpCode = (OpCode)GetOpCode(currentCode);
+            var currentOpCode = (OpCode)GetOpCode(currentCode, currentCode.ToString());
             int currentIndex = 0;
             while (currentOpCode != OpCode.End)
             {
@@ -113,7 +113,7 @@ namespace intcode_computer
                 }
                 
                 currentCode = intList[currentIndex];
-                currentOpCode = GetOpCode(currentCode);  
+                currentOpCode = GetOpCode(currentCode, currentCode.ToString());  
             }
             return (intList, outputs);
         }
@@ -130,7 +130,7 @@ namespace intcode_computer
                 {
                     if (!reset)
                         verb = initialInputList[2] + 1;
-                        reset = false;
+                    reset = false;
                     initialInputList = IntList(input);
                     initialInputList[1] = noun;
                     initialInputList[2] = verb;
