@@ -39,10 +39,7 @@ namespace intcode_computer
         private static OpCode GetOpCode(int fullCode)
         {
            return fullCode.ToString().Length < 3 ? (OpCode)fullCode : 
-                    fullCode.ToString().Length == 3 ? (OpCode)int.Parse(fullCode.ToString().Substring(1)) : 
-                    fullCode.ToString().Length == 4 ? (OpCode)int.Parse(fullCode.ToString().Substring(2)) : 
-                    fullCode.ToString().Length == 5 ? (OpCode)int.Parse(fullCode.ToString().Substring(3)) :
-                    0;
+                    (OpCode)int.Parse(fullCode.ToString().Substring(fullCode.ToString().Length - 2));
         }
         private static List<int> GetParameterTypes(int fullCode, int parameterCount)
         {
