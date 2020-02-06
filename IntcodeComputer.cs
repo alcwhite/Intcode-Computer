@@ -10,7 +10,6 @@ namespace intcode_computer
         {
             Add = 1,
             Multiply = 2,
-
             Save = 3,
             Output = 4,
             JumpIfTrue = 5,
@@ -36,9 +35,9 @@ namespace intcode_computer
             var stringList = input.Split(',').ToList();
             return stringList.Select(x => int.Parse(x.Trim())).ToList();
         }
-        private static OpCode GetOpCode(int fullOpCode, string codeString)
+        private static int GetOpCode(int fullOpCode, string codeString)
         {
-            return (OpCode)(codeString.Length < 3 ? fullOpCode : 
+            return (codeString.Length < 3 ? fullOpCode : 
                     int.Parse(codeString.Substring(codeString.Length - 2)));
         }
         private static List<int> GetParameterTypes(int fullOpCode, int parameterCount, string codeString)
@@ -52,59 +51,151 @@ namespace intcode_computer
             parameterTypeList.Reverse();
             return parameterTypeList;
         }
-        private class Calculate
+        private class Calculator
         {
-            public int? pointerLocation;
-            public int outputValue;
-            public List<int> outputs;
-
-            public Calculate(List<int> parameterValues, OpCode op, int valueForOutputOp, List<int> outputs)
+            public virtual int parameterCount => 0;
+            public virtual string opName => "Default";
+            
+            public virtual int? OutputValue(List<int> parameterValues, int valueForOutputOp)
             {
-                this.outputs = outputs;
-                if (op == OpCode.Add)
-                    outputValue = parameterValues[0] + parameterValues[1];
-                if (op == OpCode.Multiply)
-                    outputValue = parameterValues[0] * parameterValues[1];
-                if (op == OpCode.Save)
-                    outputValue = valueForOutputOp;
-                if (op == OpCode.Output)
-                    this.outputs.Add(parameterValues[0]);
-                if (op == OpCode.JumpIfTrue)
-                    if (parameterValues[0] != 0) pointerLocation = parameterValues[1];
-                if (op == OpCode.JumpIfFalse)
-                    if (parameterValues[0] == 0) pointerLocation = parameterValues[1];
-                if (op == OpCode.LessThan)
-                    outputValue = parameterValues[0] < parameterValues[1] ? 1 : 0;
-                if (op == OpCode.Equals)
-                    outputValue = parameterValues[0] == parameterValues[1] ? 1 : 0;
+                return null;
+            }
+            public virtual int? PointerLocation(List<int> parameterValues)
+            {
+                return null;
+            }
+            public virtual List<int> Outputs(List<int> parameterValues, List<int> outputs)
+            {
+                return outputs;
             }
                
+        }
+        private static Calculator CreateCalculator(int op)
+        {
+            switch(op)
+            {
+                case 1:
+                    return new Add();
+                case 2:
+                    return new Multiply();
+                case 3:
+                    return new Save();
+                case 4:
+                    return new Output();
+                case 5:
+                    return new JumpIfTrue();
+                case 6:
+                    return new JumpIfFalse();
+                case 7:
+                    return new LessThan();
+                case 8:
+                    return new Equal();
+                default:
+                    throw new Exception();
+            }
+        }
+        private class Add : Calculator
+        {
+            public override int parameterCount => 3;
+            public override string opName => "Add";
+            public override int? OutputValue(List<int> parameterValues, int valueForOutputOp)
+            {
+                return parameterValues[0] + parameterValues[1];
+            }
+        }
+        private class Multiply : Calculator
+        {
+            public override int parameterCount => 3;
+            public override string opName => "Multiply";
+            public override int? OutputValue(List<int> parameterValues, int valueForOutputOp)
+            {
+                return parameterValues[0] * parameterValues[1];
+            }
+        }
+        private class Save : Calculator
+        {
+            public override int parameterCount => 1;
+            public override string opName => "Save";
+            public override int? OutputValue(List<int> parameterValues, int valueForOutputOp)
+            {
+                return valueForOutputOp;
+            }
+        }
+        private class Output : Calculator
+        {
+            public override int parameterCount => 1;
+            public override string opName => "Output";
+            public override List<int> Outputs(List<int> parameterValues, List<int> outputs)
+            {
+                var finalOutputs = outputs;
+                finalOutputs.Add(parameterValues[0]);
+                return finalOutputs;
+            }
+        }
+        private class JumpIfTrue : Calculator
+        {
+            public override int parameterCount => 2;
+            public override string opName => "JumpIfTrue";
+            public override int? PointerLocation(List<int> parameterValues)
+            {
+                if (parameterValues[0] != 0) return parameterValues[1];
+                return null;
+            }
+        }
+        private class JumpIfFalse : Calculator
+        {
+            public override int parameterCount => 2;
+            public override string opName => "JumpIfFalse";
+            public override int? PointerLocation(List<int> parameterValues)
+            {
+                if (parameterValues[0] == 0) return parameterValues[1];
+                return null;
+            }
+        }
+        private class LessThan : Calculator
+        {
+            public override int parameterCount => 3;
+            public override string opName => "LessThan";
+            public override int? OutputValue(List<int> parameterValues, int valueForOutputOp)
+            {
+                return parameterValues[0] < parameterValues[1] ? 1 : 0;
+            }
+        }
+        private class Equal : Calculator
+        {
+            public override int parameterCount => 3;
+            public override string opName => "Equal";
+            public override int? OutputValue(List<int> parameterValues, int valueForOutputOp)
+            {
+                return parameterValues[0] == parameterValues[1] ? 1 : 0;
+            }
         }
         public static (List<int> result, List<int> outputs) RunComputer(string input, int valueForOutputOp)
         {
             var programAsList = ConvertProgramStringToList(input);
             var outputs = new List<int>();
             int currentCode = programAsList[0];
-            var currentOpCode = (OpCode)GetOpCode(currentCode, currentCode.ToString());
+            var currentOpCode = GetOpCode(currentCode, currentCode.ToString());
             int currentIndex = 0;
-            while (currentOpCode != OpCode.End)
+            while (currentOpCode != 99)
             {
-                parameterCounts.TryGetValue(currentOpCode, out int parameterCount);
-                var parameterTypes = GetParameterTypes(currentCode, parameterCount, currentCode.ToString());
+                var calculator = CreateCalculator(currentOpCode); 
+                if (calculator.opName == "Default") throw new Exception();
+                var parameterTypes = GetParameterTypes(currentCode, calculator.parameterCount, currentCode.ToString());
                 var parameterValues = parameterTypes.Select((x, i) => 
                 {
                     return x == 0 ? programAsList[programAsList[currentIndex + i + 1]] : programAsList[currentIndex + i + 1];
                 }).ToList();
-                var values = new Calculate(parameterValues, currentOpCode, valueForOutputOp, outputs); 
-                int outputValue = values.outputValue;
-                int? pointerLocation = values.pointerLocation;
-                outputs = values.outputs;
+                
+                int? outputValue = calculator.OutputValue(parameterValues, valueForOutputOp);
+                int? pointerLocation = calculator.PointerLocation(parameterValues);
+                outputs = calculator.Outputs(parameterValues, outputs);
                 
                 if (!pointerLocation.HasValue)
                 {
-                    var outputLocation = programAsList[currentIndex + parameterCount];
-                    if (currentOpCode != OpCode.Output && currentOpCode != OpCode.JumpIfFalse && currentOpCode != OpCode.JumpIfTrue) programAsList[outputLocation] = outputValue;       
-                    currentIndex += parameterCount + 1; 
+                    var outputLocation = programAsList[currentIndex + calculator.parameterCount];
+                    if (calculator.opName != "Output" && calculator.opName != "JumpIfFalse" && calculator.opName != "JumpIfTrue") programAsList[outputLocation] = (int)outputValue;       
+                    currentIndex += calculator.parameterCount + 1; 
                 }
                 else
                 {
