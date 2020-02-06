@@ -36,14 +36,13 @@ namespace intcode_computer
             var stringList = input.Split(',').ToList();
             return stringList.Select(x => int.Parse(x.Trim())).ToList();
         }
-        private static OpCode GetOpCode(int fullCode, string codeString)
+        private static OpCode GetOpCode(int fullOpCode, string codeString)
         {
-            return (OpCode)(codeString.Length < 3 ? fullCode : 
+            return (OpCode)(codeString.Length < 3 ? fullOpCode : 
                     int.Parse(codeString.Substring(codeString.Length - 2)));
         }
-        private static List<int> GetParameterTypes(int fullCode, int parameterCount)
+        private static List<int> GetParameterTypes(int fullOpCode, int parameterCount, string codeString)
         {
-            var codeString = fullCode.ToString();
             var parameterTypeList = codeString.Length > 2 ? codeString.Substring(0, codeString.Length - 2).ToList().Select(x => int.Parse(x.ToString())).ToList() : new List<int>();
             while (parameterTypeList.Count < parameterCount)
             {
@@ -59,7 +58,7 @@ namespace intcode_computer
             public int outputValue;
             public List<int> outputs;
 
-            public Calculate(List<int> parameterValues, OpCode op, int id, List<int> outputs)
+            public Calculate(List<int> parameterValues, OpCode op, int valueForOutputOp, List<int> outputs)
             {
                 this.outputs = outputs;
                 if (op == OpCode.Add)
@@ -67,7 +66,7 @@ namespace intcode_computer
                 if (op == OpCode.Multiply)
                     outputValue = parameterValues[0] * parameterValues[1];
                 if (op == OpCode.Save)
-                    outputValue = id;
+                    outputValue = valueForOutputOp;
                 if (op == OpCode.Output)
                     this.outputs.Add(parameterValues[0]);
                 if (op == OpCode.JumpIfTrue)
@@ -81,30 +80,30 @@ namespace intcode_computer
             }
                
         }
-        public static (List<int> result, List<int> outputs) RunComputer(string input, int id)
+        public static (List<int> result, List<int> outputs) RunComputer(string input, int valueForOutputOp)
         {
-            var intList = IntList(input);
+            var programAsList = IntList(input);
             var outputs = new List<int>();
-            int currentCode = intList[0];
+            int currentCode = programAsList[0];
             var currentOpCode = (OpCode)GetOpCode(currentCode, currentCode.ToString());
             int currentIndex = 0;
             while (currentOpCode != OpCode.End)
             {
                 parameterCounts.TryGetValue(currentOpCode, out int parameterCount);
-                var parameterTypes = GetParameterTypes(currentCode, parameterCount);
+                var parameterTypes = GetParameterTypes(currentCode, parameterCount, currentCode.ToString());
                 var parameterValues = parameterTypes.Select((x, i) => 
                 {
-                    return x == 0 ? intList[intList[currentIndex + i + 1]] : intList[currentIndex + i + 1];
+                    return x == 0 ? programAsList[programAsList[currentIndex + i + 1]] : programAsList[currentIndex + i + 1];
                 }).ToList();
-                var values = new Calculate(parameterValues, currentOpCode, id, outputs); 
+                var values = new Calculate(parameterValues, currentOpCode, valueForOutputOp, outputs); 
                 int outputValue = values.outputValue;
                 int? pointerLocation = values.pointerLocation;
                 outputs = values.outputs;
                 
                 if (!pointerLocation.HasValue)
                 {
-                    var outputLocation = intList[currentIndex + parameterCount];
-                    if (currentOpCode != OpCode.Output && currentOpCode != OpCode.JumpIfFalse && currentOpCode != OpCode.JumpIfTrue) intList[outputLocation] = outputValue;       
+                    var outputLocation = programAsList[currentIndex + parameterCount];
+                    if (currentOpCode != OpCode.Output && currentOpCode != OpCode.JumpIfFalse && currentOpCode != OpCode.JumpIfTrue) programAsList[outputLocation] = outputValue;       
                     currentIndex += parameterCount + 1; 
                 }
                 else
@@ -112,33 +111,33 @@ namespace intcode_computer
                     currentIndex = (int)pointerLocation;
                 }
                 
-                currentCode = intList[currentIndex];
+                currentCode = programAsList[currentIndex];
                 currentOpCode = GetOpCode(currentCode, currentCode.ToString());  
             }
-            return (intList, outputs);
+            return (programAsList, outputs);
         }
-        public static List<int> RunForOutput(string input, int output, int id)
+        public static List<int> RunForOutput(string input, int expectedOutput, int valueForOutputOp)
         {
-            var initialInputList = IntList(input);
-            var finalList = RunComputer(input, id).result;
-            var noun = initialInputList[1];
-            var verb = initialInputList[2];
+            var programAsIntList = IntList(input);
+            var finalList = RunComputer(input, valueForOutputOp).result;
+            var noun = programAsIntList[1];
+            var verb = programAsIntList[2];
             while (noun < 99)
             {
                 bool reset = true;
                 while (verb < 99)
                 {
-                    if (!reset) verb = initialInputList[2] + 1;
+                    if (!reset) verb = programAsIntList[2] + 1;
                     reset = false;
-                    initialInputList = IntList(input);
-                    initialInputList[1] = noun;
-                    initialInputList[2] = verb;
-                    IEnumerable<string> listToRun = initialInputList.Select(x => x.ToString());
-                    finalList = RunComputer(string.Join(",", listToRun), id).result;
-                    if (finalList[0] == output) break;
+                    programAsIntList = IntList(input);
+                    programAsIntList[1] = noun;
+                    programAsIntList[2] = verb;
+                    IEnumerable<string> listToRun = programAsIntList.Select(x => x.ToString());
+                    finalList = RunComputer(string.Join(",", listToRun), valueForOutputOp).result;
+                    if (finalList[0] == expectedOutput) break;
                 }
-                if (finalList[0] == output) break;
-                noun = initialInputList[1] + 1;
+                if (finalList[0] == expectedOutput) break;
+                noun = programAsIntList[1] + 1;
                 reset = true;
                 verb = 0;   
             }
