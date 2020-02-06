@@ -31,7 +31,7 @@ namespace intcode_computer
             {OpCode.Equals, 3},
             {OpCode.End, 0}
         };
-        private static List<int> IntList(string input)
+        private static List<int> ConvertProgramStringToList(string input)
         {
             var stringList = input.Split(',').ToList();
             return stringList.Select(x => int.Parse(x.Trim())).ToList();
@@ -82,7 +82,7 @@ namespace intcode_computer
         }
         public static (List<int> result, List<int> outputs) RunComputer(string input, int valueForOutputOp)
         {
-            var programAsList = IntList(input);
+            var programAsList = ConvertProgramStringToList(input);
             var outputs = new List<int>();
             int currentCode = programAsList[0];
             var currentOpCode = (OpCode)GetOpCode(currentCode, currentCode.ToString());
@@ -118,7 +118,7 @@ namespace intcode_computer
         }
         public static List<int> RunForOutput(string input, int expectedOutput, int valueForOutputOp)
         {
-            var programAsIntList = IntList(input);
+            var programAsIntList = ConvertProgramStringToList(input);
             var finalList = RunComputer(input, valueForOutputOp).result;
             var noun = programAsIntList[1];
             var verb = programAsIntList[2];
@@ -129,7 +129,7 @@ namespace intcode_computer
                 {
                     if (!reset) verb = programAsIntList[2] + 1;
                     reset = false;
-                    programAsIntList = IntList(input);
+                    programAsIntList = ConvertProgramStringToList(input);
                     programAsIntList[1] = noun;
                     programAsIntList[2] = verb;
                     IEnumerable<string> listToRun = programAsIntList.Select(x => x.ToString());
