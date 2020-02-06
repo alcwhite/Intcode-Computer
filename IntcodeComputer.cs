@@ -6,41 +6,42 @@ namespace intcode_computer
 {
     public static class IntcodeComputer
     {
-         static Dictionary<int, string> opCodes = new Dictionary<int, string>()
+         enum OpCode
         {
-            {1, "ADD"},
-            {2, "MULTIPLY"},
-            {3, "SAVE"},
-            {4, "OUTPUT"},
-            {5, "JUMP-IF-TRUE"},
-            {6, "JUMP-IF-FALSE"},
-            {7, "LESS THAN"},
-            {8, "EQUALS"},
-            {99, "END"}
+            Add = 1,
+            Multiply = 2,
+
+            Save = 3,
+            Output = 4,
+            JumpIfTrue = 5,
+            JumpIfFalse = 6,
+            LessThan = 7,
+            Equals = 8,
+            End = 99
         };
-        static Dictionary<int, int> parameterCounts = new Dictionary<int, int>()
+        static Dictionary<OpCode, int> parameterCounts = new Dictionary<OpCode, int>()
         {
-            {1, 3},
-            {2, 3},
-            {3, 1},
-            {4, 1},
-            {5, 2},
-            {6, 2},
-            {7, 3},
-            {8, 3},
-            {99, 0}
+            {OpCode.Add, 3},
+            {OpCode.Multiply, 3},
+            {OpCode.Save, 1},
+            {OpCode.Output, 1},
+            {OpCode.JumpIfTrue, 2},
+            {OpCode.JumpIfFalse, 2},
+            {OpCode.LessThan, 3},
+            {OpCode.Equals, 3},
+            {OpCode.End, 0}
         };
         private static List<int> IntList(string input)
         {
             var stringList = input.Split(',').ToList();
             return stringList.Select(x => int.Parse(x.Trim())).ToList();
         }
-        private static int GetOpCode(int fullCode)
+        private static OpCode GetOpCode(int fullCode)
         {
-           return fullCode.ToString().Length < 3 ? fullCode : 
-                    fullCode.ToString().Length == 3 ? int.Parse(fullCode.ToString().Substring(1)) : 
-                    fullCode.ToString().Length == 4 ? int.Parse(fullCode.ToString().Substring(2)) : 
-                    fullCode.ToString().Length == 5 ? int.Parse(fullCode.ToString().Substring(3)) :
+           return fullCode.ToString().Length < 3 ? (OpCode)fullCode : 
+                    fullCode.ToString().Length == 3 ? (OpCode)int.Parse(fullCode.ToString().Substring(1)) : 
+                    fullCode.ToString().Length == 4 ? (OpCode)int.Parse(fullCode.ToString().Substring(2)) : 
+                    fullCode.ToString().Length == 5 ? (OpCode)int.Parse(fullCode.ToString().Substring(3)) :
                     0;
         }
         private static List<int> GetParameterTypes(int fullCode, int parameterCount)
@@ -61,24 +62,24 @@ namespace intcode_computer
             public int outputValue;
             public List<int> outputs;
 
-            public Calculate(List<int> parameterValues, string op, int id, List<int> outputs)
+            public Calculate(List<int> parameterValues, OpCode op, int id, List<int> outputs)
             {
                 this.outputs = outputs;
-                if (op == "ADD")
+                if (op == OpCode.Add)
                     outputValue = parameterValues[0] + parameterValues[1];
-                if (op == "MULTIPLY")
+                if (op == OpCode.Multiply)
                     outputValue = parameterValues[0] * parameterValues[1];
-                if (op == "SAVE")
+                if (op == OpCode.Save)
                     outputValue = id;
-                if (op == "OUTPUT")
+                if (op == OpCode.Output)
                     this.outputs.Add(parameterValues[0]);
-                if (op == "JUMP-IF-TRUE")
+                if (op == OpCode.JumpIfTrue)
                     if (parameterValues[0] != 0) pointerLocation = parameterValues[1];
-                if (op == "JUMP-IF-FALSE")
+                if (op == OpCode.JumpIfFalse)
                     if (parameterValues[0] == 0) pointerLocation = parameterValues[1];
-                if (op == "LESS THAN")
+                if (op == OpCode.LessThan)
                     outputValue = parameterValues[0] < parameterValues[1] ? 1 : 0;
-                if (op == "EQUALS")
+                if (op == OpCode.Equals)
                     outputValue = parameterValues[0] == parameterValues[1] ? 1 : 0;
             }
                
@@ -88,19 +89,17 @@ namespace intcode_computer
             var intList = IntList(input);
             var outputs = new List<int>();
             int currentCode = intList[0];
-            int currentOpCode = GetOpCode(currentCode);
+            var currentOpCode = (OpCode)GetOpCode(currentCode);
             int currentIndex = 0;
-            while (opCodes.Keys.Contains(currentOpCode) && currentOpCode != 99)
+            while (currentOpCode != OpCode.End)
             {
-                if (currentOpCode == 99) break;
-                opCodes.TryGetValue(currentOpCode, out string op);
                 parameterCounts.TryGetValue(currentOpCode, out int parameterCount);
                 var parameterTypes = GetParameterTypes(currentCode, parameterCount);
                 var parameterValues = parameterTypes.Select((x, i) => 
                 {
                     return x == 0 ? intList[intList[currentIndex + i + 1]] : intList[currentIndex + i + 1];
                 }).ToList();
-                var values = new Calculate(parameterValues, op, id, outputs); 
+                var values = new Calculate(parameterValues, currentOpCode, id, outputs); 
                 int outputValue = values.outputValue;
                 int? pointerLocation = values.pointerLocation;
                 outputs = values.outputs;
@@ -108,7 +107,7 @@ namespace intcode_computer
                 if (!pointerLocation.HasValue)
                 {
                     var outputLocation = intList[currentIndex + parameterCount];
-                    if (op != "OUTPUT" && op != "JUMP-IF-FALSE" && op != "JUMP-IF-TRUE") intList[outputLocation] = outputValue;       
+                    if (currentOpCode != OpCode.Output && currentOpCode != OpCode.JumpIfFalse && currentOpCode != OpCode.JumpIfTrue) intList[outputLocation] = outputValue;       
                     currentIndex += parameterCount + 1; 
                 }
                 else
