@@ -128,8 +128,7 @@ namespace intcode_computer
                 bool reset = true;
                 while (verb < 99)
                 {
-                    if (!reset)
-                        verb = initialInputList[2] + 1;
+                    if (!reset) verb = initialInputList[2] + 1;
                     reset = false;
                     initialInputList = IntList(input);
                     initialInputList[1] = noun;
