@@ -17,8 +17,6 @@ namespace intcode_computer
             {
                 var calculator = CreateCalculator(currentOpCode, currentIndex, currentCode, programAsList, outputs, valueForOutputOp); 
                 
-                calculator.SetParameterValues();
-                
                 int? outputValue = calculator.OutputValue();
                 int? pointerLocation = calculator.PointerLocation();
                 outputs = calculator.Outputs();
@@ -94,6 +92,7 @@ namespace intcode_computer
                 this.programAsList = programAsList;
                 this.outputs = outputs;
                 this.valueForOutputOp = valueForOutputOp;
+                parameterValues = SetParameterValues();
             }
             private List<int> SetParameterTypes()
             {
@@ -106,10 +105,10 @@ namespace intcode_computer
                 parameterTypeList.Reverse();
                 return parameterTypeList;
             }
-            public void SetParameterValues()
+            public List<int> SetParameterValues()
             {
                 var parameterTypes = SetParameterTypes();
-                parameterValues = parameterTypes.Select((x, i) => 
+                return parameterValues = parameterTypes.Select((x, i) => 
                     {
                         return x == 0 ? programAsList[programAsList[currentIndex + i + 1]] : programAsList[currentIndex + i + 1];
                     }).ToList();
