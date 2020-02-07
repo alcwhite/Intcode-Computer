@@ -12,27 +12,27 @@ public class Day5Test
     public void Part1_Puzzle()
     {
         var result = intcode_computer.IntcodeComputer.RunComputer(puzzleInput, 1);
-        Assert.Equal(4511442, result.outputs[result.outputs.Count - 1]);
+        Assert.Equal(4511442, result.outputCodes[result.outputCodes.Count - 1]);
     }
     [Fact]
     public void JumpTest1()
     {
-        Assert.Equal(1, intcode_computer.IntcodeComputer.RunComputer(jumpTest1Input, 5).outputs[0]);
+        Assert.Equal(1, intcode_computer.IntcodeComputer.RunComputer(jumpTest1Input, 5).outputCodes[0]);
     }
     [Fact]
     public void JumpTest1_ZeroInput()
     {
-        Assert.Equal(0, intcode_computer.IntcodeComputer.RunComputer(jumpTest1Input, 0).outputs[0]);
+        Assert.Equal(0, intcode_computer.IntcodeComputer.RunComputer(jumpTest1Input, 0).outputCodes[0]);
     }
     [Fact]
     public void JumpTest2()
     {
-        Assert.Equal(1, intcode_computer.IntcodeComputer.RunComputer(jumpTest2Input, 5).outputs[0]);
+        Assert.Equal(1, intcode_computer.IntcodeComputer.RunComputer(jumpTest2Input, 5).outputCodes[0]);
     }
     [Fact]
     public void JumpTest2_ZeroInput()
     {
-        Assert.Equal(0, intcode_computer.IntcodeComputer.RunComputer(jumpTest2Input, 0).outputs[0]);
+        Assert.Equal(0, intcode_computer.IntcodeComputer.RunComputer(jumpTest2Input, 0).outputCodes[0]);
     }
     [Fact]
     public void Large_Test()
@@ -41,14 +41,14 @@ public class Day5Test
         int input1 = 3;
         int input2 = 8;
         int input3 = 10;
-        Assert.Equal(999, intcode_computer.IntcodeComputer.RunComputer(input, input1).outputs[0]);
-        Assert.Equal(1000, intcode_computer.IntcodeComputer.RunComputer(input, input2).outputs[0]);
-        Assert.Equal(1001, intcode_computer.IntcodeComputer.RunComputer(input, input3).outputs[0]);
+        Assert.Equal(999, intcode_computer.IntcodeComputer.RunComputer(input, input1).outputCodes[0]);
+        Assert.Equal(1000, intcode_computer.IntcodeComputer.RunComputer(input, input2).outputCodes[0]);
+        Assert.Equal(1001, intcode_computer.IntcodeComputer.RunComputer(input, input3).outputCodes[0]);
     }
     [Fact]
     public void Part2_Puzzle()
     {
         var result = intcode_computer.IntcodeComputer.RunComputer(puzzleInput, 5);
-        Assert.Equal(12648139, result.outputs[0]);
+        Assert.Equal(12648139, result.outputCodes[0]);
     }
 }
