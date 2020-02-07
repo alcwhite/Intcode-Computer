@@ -18,16 +18,7 @@ namespace intcode_computer
                 var calculator = CreateCalculator(currentOpCode, currentPointerLocation, currentCode, programAsList, outputCodes, valueForOutputOp); 
                 
                 
-                if (!calculator.nextPointerLocation.HasValue)
-                {
-                    var outputLocation = programAsList[currentPointerLocation + calculator.parameterCount];
-                    if (calculator.outputValue.HasValue) programAsList[outputLocation] = (int)calculator.outputValue;       
-                    currentPointerLocation += calculator.parameterCount + 1; 
-                }
-                else
-                {
-                    currentPointerLocation = (int)calculator.nextPointerLocation;
-                }
+                currentPointerLocation = calculator.MovePointer();
                 
                 currentCode = programAsList[currentPointerLocation];
                 currentOpCode = GetOpCode(currentCode);  
@@ -80,7 +71,7 @@ namespace intcode_computer
             public int? nextPointerLocation { get; set; }
             public int? outputValue { get; set; }
             private int currentCode;
-            private int currentnextPointerLocation;
+            private int currentPointerLocation;
             private List<int> programAsList;
             public List<int> outputCodes;
             public int valueForOutputOp;
@@ -88,7 +79,7 @@ namespace intcode_computer
             public Calculator(int currentCode, int currentnextPointerLocation, List<int> programAsList, List<int> outputCodes, int valueForOutputOp)
             {
                 this.currentCode = currentCode;
-                this.currentnextPointerLocation = currentnextPointerLocation;
+                this.currentPointerLocation = currentnextPointerLocation;
                 this.programAsList = programAsList;
                 this.outputCodes = outputCodes;
                 this.valueForOutputOp = valueForOutputOp;
@@ -96,6 +87,19 @@ namespace intcode_computer
                 nextPointerLocation = SetNextPointerLocation();
                 outputValue = SetOutputValue();
                 outputCodes = AddOutputCode();
+            }
+            public int MovePointer()
+            {
+                if (!nextPointerLocation.HasValue)
+                {
+                    var outputLocation = programAsList[currentPointerLocation + parameterCount];
+                    if (outputValue.HasValue) programAsList[outputLocation] = (int)outputValue;       
+                    return currentPointerLocation + parameterCount + 1; 
+                }
+                else
+                {
+                    return (int)nextPointerLocation;
+                }
             }
             private List<int> SetParameterTypes()
             {
@@ -113,7 +117,7 @@ namespace intcode_computer
                 var parameterTypes = SetParameterTypes();
                 return parameterValues = parameterTypes.Select((x, i) => 
                     {
-                        return x == 0 ? programAsList[programAsList[currentnextPointerLocation + i + 1]] : programAsList[currentnextPointerLocation + i + 1];
+                        return x == 0 ? programAsList[programAsList[currentPointerLocation + i + 1]] : programAsList[currentPointerLocation + i + 1];
                     }).ToList();
             }
             
