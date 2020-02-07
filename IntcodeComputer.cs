@@ -15,7 +15,7 @@ namespace intcode_computer
             int currentIndex = 0;
             while (currentOpCode != 99)
             {
-                var calculator = CreateCalculator(currentOpCode); 
+                var calculator = CreateCalculator(currentOpCode, currentIndex, currentCode, programAsList); 
                 
                 calculator.SetParameterValues(currentCode, programAsList, currentIndex);
                 
@@ -71,9 +71,9 @@ namespace intcode_computer
             var stringList = input.Split(',').ToList();
             return stringList.Select(x => int.Parse(x.Trim())).ToList();
         }
-        private static int GetOpCode(int fullOpCode, string codeString)
+        private static int GetOpCode(int currentCode, string codeString)
         {
-            return (codeString.Length < 3 ? fullOpCode : 
+            return (codeString.Length < 3 ? currentCode : 
                     int.Parse(codeString.Substring(codeString.Length - 2)));
         }
         
@@ -81,26 +81,35 @@ namespace intcode_computer
         {
             public virtual int parameterCount => 0;
             public List<int> parameterValues { get; set; }
-            private List<int> SetParameterTypes(int fullOpCode)
-        {
-            var codeString = fullOpCode.ToString();
-            var parameterTypeList = codeString.Length > 2 ? codeString.Substring(0, codeString.Length - 2).ToList().Select(x => int.Parse(x.ToString())).ToList() : new List<int>();
-            while (parameterTypeList.Count < parameterCount)
+            private int currentCode;
+            private int currentIndex;
+            private List<int> programAsList;
+            public Calculator(int currentCode, int currentIndex, List<int> programAsList)
             {
-                parameterTypeList.Insert(0, 0);
+                this.currentCode = currentCode;
+                this.currentIndex = currentIndex;
+                this.programAsList = programAsList;
             }
-            var parameterTypes = new List<int>();
-            parameterTypeList.Reverse();
-            return parameterTypeList;
-        }
-        public void SetParameterValues(int currentCode, List<int> programAsList, int currentIndex)
-        {
-            var parameterTypes = SetParameterTypes(currentCode);
-            parameterValues = parameterTypes.Select((x, i) => 
+            private List<int> SetParameterTypes(int currentCode)
+            {
+                var codeString = currentCode.ToString();
+                var parameterTypeList = codeString.Length > 2 ? codeString.Substring(0, codeString.Length - 2).ToList().Select(x => int.Parse(x.ToString())).ToList() : new List<int>();
+                while (parameterTypeList.Count < parameterCount)
                 {
-                    return x == 0 ? programAsList[programAsList[currentIndex + i + 1]] : programAsList[currentIndex + i + 1];
-                }).ToList();
-        }
+                    parameterTypeList.Insert(0, 0);
+                }
+                var parameterTypes = new List<int>();
+                parameterTypeList.Reverse();
+                return parameterTypeList;
+            }
+            public void SetParameterValues(int currentCode, List<int> programAsList, int currentIndex)
+            {
+                var parameterTypes = SetParameterTypes(currentCode);
+                parameterValues = parameterTypes.Select((x, i) => 
+                    {
+                        return x == 0 ? programAsList[programAsList[currentIndex + i + 1]] : programAsList[currentIndex + i + 1];
+                    }).ToList();
+            }
             
             public virtual int? OutputValue(int valueForOutputOp)
             {
@@ -113,35 +122,11 @@ namespace intcode_computer
             public virtual List<int> Outputs(List<int> outputs)
             {
                 return outputs;
-            }
-               
-        }
-        private static Calculator CreateCalculator(int op)
-        {
-            switch(op)
-            {
-                case 1:
-                    return new Add();
-                case 2:
-                    return new Multiply();
-                case 3:
-                    return new Save();
-                case 4:
-                    return new Output();
-                case 5:
-                    return new JumpIfTrue();
-                case 6:
-                    return new JumpIfFalse();
-                case 7:
-                    return new LessThan();
-                case 8:
-                    return new Equal();
-                default:
-                    throw new Exception();
-            }
+            }      
         }
         private class Add : Calculator
         {
+            public Add(int currentCode, int currentIndex, List<int> programAsList) : base(currentCode, currentIndex, programAsList) {}
             public override int parameterCount => 3;
             public override int? OutputValue(int valueForOutputOp)
             {
@@ -150,6 +135,7 @@ namespace intcode_computer
         }
         private class Multiply : Calculator
         {
+            public Multiply(int currentCode, int currentIndex, List<int> programAsList) : base(currentCode, currentIndex, programAsList) {}
             public override int parameterCount => 3;
             public override int? OutputValue(int valueForOutputOp)
             {
@@ -158,6 +144,7 @@ namespace intcode_computer
         }
         private class Save : Calculator
         {
+            public Save(int currentCode, int currentIndex, List<int> programAsList) : base(currentCode, currentIndex, programAsList) {}
             public override int parameterCount => 1;
             public override int? OutputValue(int valueForOutputOp)
             {
@@ -166,6 +153,7 @@ namespace intcode_computer
         }
         private class Output : Calculator
         {
+            public Output(int currentCode, int currentIndex, List<int> programAsList) : base(currentCode, currentIndex, programAsList) {}
             public override int parameterCount => 1;
             public override List<int> Outputs(List<int> outputs)
             {
@@ -176,6 +164,7 @@ namespace intcode_computer
         }
         private class JumpIfTrue : Calculator
         {
+            public JumpIfTrue(int currentCode, int currentIndex, List<int> programAsList) : base(currentCode, currentIndex, programAsList) {}
             public override int parameterCount => 2;
             public override int? PointerLocation()
             {
@@ -185,6 +174,7 @@ namespace intcode_computer
         }
         private class JumpIfFalse : Calculator
         {
+            public JumpIfFalse(int currentCode, int currentIndex, List<int> programAsList) : base(currentCode, currentIndex, programAsList) {}
             public override int parameterCount => 2;
             public override int? PointerLocation()
             {
@@ -194,6 +184,7 @@ namespace intcode_computer
         }
         private class LessThan : Calculator
         {
+            public LessThan(int currentCode, int currentIndex, List<int> programAsList) : base(currentCode, currentIndex, programAsList) {}
             public override int parameterCount => 3;
             public override int? OutputValue(int valueForOutputOp)
             {
@@ -202,12 +193,36 @@ namespace intcode_computer
         }
         private class Equal : Calculator
         {
+            public Equal(int currentCode, int currentIndex, List<int> programAsList) : base(currentCode, currentIndex, programAsList) {}
             public override int parameterCount => 3;
             public override int? OutputValue(int valueForOutputOp)
             {
                 return parameterValues[0] == parameterValues[1] ? 1 : 0;
             }
         }
-        
+        private static Calculator CreateCalculator(int op, int currentIndex, int currentCode, List<int> programAsList)
+        {
+            switch(op)
+            {
+                case 1:
+                    return new Add(currentCode, currentIndex, programAsList);
+                case 2:
+                    return new Multiply(currentCode, currentIndex, programAsList);
+                case 3:
+                    return new Save(currentCode, currentIndex, programAsList);
+                case 4:
+                    return new Output(currentCode, currentIndex, programAsList);
+                case 5:
+                    return new JumpIfTrue(currentCode, currentIndex, programAsList);
+                case 6:
+                    return new JumpIfFalse(currentCode, currentIndex, programAsList);
+                case 7:
+                    return new LessThan(currentCode, currentIndex, programAsList);
+                case 8:
+                    return new Equal(currentCode, currentIndex, programAsList);
+                default:
+                    throw new Exception();
+            }
+        }
     }
 }
