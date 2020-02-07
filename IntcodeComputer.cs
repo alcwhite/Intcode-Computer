@@ -6,30 +6,6 @@ namespace intcode_computer
 {
     public static class IntcodeComputer
     {
-         enum OpCode
-        {
-            Add = 1,
-            Multiply = 2,
-            Save = 3,
-            Output = 4,
-            JumpIfTrue = 5,
-            JumpIfFalse = 6,
-            LessThan = 7,
-            Equals = 8,
-            End = 99
-        };
-        static Dictionary<OpCode, int> parameterCounts = new Dictionary<OpCode, int>()
-        {
-            {OpCode.Add, 3},
-            {OpCode.Multiply, 3},
-            {OpCode.Save, 1},
-            {OpCode.Output, 1},
-            {OpCode.JumpIfTrue, 2},
-            {OpCode.JumpIfFalse, 2},
-            {OpCode.LessThan, 3},
-            {OpCode.Equals, 3},
-            {OpCode.End, 0}
-        };
         private static List<int> ConvertProgramStringToList(string input)
         {
             var stringList = input.Split(',').ToList();
@@ -54,7 +30,6 @@ namespace intcode_computer
         private class Calculator
         {
             public virtual int parameterCount => 0;
-            public virtual string opName => "Default";
             
             public virtual int? OutputValue(List<int> parameterValues, int valueForOutputOp)
             {
@@ -97,7 +72,6 @@ namespace intcode_computer
         private class Add : Calculator
         {
             public override int parameterCount => 3;
-            public override string opName => "Add";
             public override int? OutputValue(List<int> parameterValues, int valueForOutputOp)
             {
                 return parameterValues[0] + parameterValues[1];
@@ -106,7 +80,6 @@ namespace intcode_computer
         private class Multiply : Calculator
         {
             public override int parameterCount => 3;
-            public override string opName => "Multiply";
             public override int? OutputValue(List<int> parameterValues, int valueForOutputOp)
             {
                 return parameterValues[0] * parameterValues[1];
@@ -115,7 +88,6 @@ namespace intcode_computer
         private class Save : Calculator
         {
             public override int parameterCount => 1;
-            public override string opName => "Save";
             public override int? OutputValue(List<int> parameterValues, int valueForOutputOp)
             {
                 return valueForOutputOp;
@@ -124,7 +96,6 @@ namespace intcode_computer
         private class Output : Calculator
         {
             public override int parameterCount => 1;
-            public override string opName => "Output";
             public override List<int> Outputs(List<int> parameterValues, List<int> outputs)
             {
                 var finalOutputs = outputs;
@@ -135,7 +106,6 @@ namespace intcode_computer
         private class JumpIfTrue : Calculator
         {
             public override int parameterCount => 2;
-            public override string opName => "JumpIfTrue";
             public override int? PointerLocation(List<int> parameterValues)
             {
                 if (parameterValues[0] != 0) return parameterValues[1];
@@ -145,7 +115,6 @@ namespace intcode_computer
         private class JumpIfFalse : Calculator
         {
             public override int parameterCount => 2;
-            public override string opName => "JumpIfFalse";
             public override int? PointerLocation(List<int> parameterValues)
             {
                 if (parameterValues[0] == 0) return parameterValues[1];
@@ -155,7 +124,6 @@ namespace intcode_computer
         private class LessThan : Calculator
         {
             public override int parameterCount => 3;
-            public override string opName => "LessThan";
             public override int? OutputValue(List<int> parameterValues, int valueForOutputOp)
             {
                 return parameterValues[0] < parameterValues[1] ? 1 : 0;
@@ -164,7 +132,6 @@ namespace intcode_computer
         private class Equal : Calculator
         {
             public override int parameterCount => 3;
-            public override string opName => "Equal";
             public override int? OutputValue(List<int> parameterValues, int valueForOutputOp)
             {
                 return parameterValues[0] == parameterValues[1] ? 1 : 0;
@@ -180,7 +147,6 @@ namespace intcode_computer
             while (currentOpCode != 99)
             {
                 var calculator = CreateCalculator(currentOpCode); 
-                if (calculator.opName == "Default") throw new Exception();
                 var parameterTypes = GetParameterTypes(currentCode, calculator.parameterCount, currentCode.ToString());
                 var parameterValues = parameterTypes.Select((x, i) => 
                 {
@@ -194,7 +160,7 @@ namespace intcode_computer
                 if (!pointerLocation.HasValue)
                 {
                     var outputLocation = programAsList[currentIndex + calculator.parameterCount];
-                    if (calculator.opName != "Output" && calculator.opName != "JumpIfFalse" && calculator.opName != "JumpIfTrue") programAsList[outputLocation] = (int)outputValue;       
+                    if (outputValue.HasValue) programAsList[outputLocation] = (int)outputValue;       
                     currentIndex += calculator.parameterCount + 1; 
                 }
                 else
