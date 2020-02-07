@@ -17,9 +17,7 @@ namespace intcode_computer
             {
                 var calculator = CreateCalculator(currentOpCode, currentPointerLocation, currentCode, programAsList, outputCodes, valueForOutputOp); 
                 
-                
                 currentPointerLocation = calculator.MovePointer();
-                
                 currentCode = programAsList[currentPointerLocation];
                 currentOpCode = GetOpCode(currentCode);  
             }
@@ -71,7 +69,7 @@ namespace intcode_computer
             public int? nextPointerLocation { get; set; }
             public int? outputValue { get; set; }
             private int currentCode;
-            private int currentPointerLocation;
+            public int currentPointerLocation;
             private List<int> programAsList;
             public List<int> outputCodes;
             public int valueForOutputOp;
@@ -88,18 +86,11 @@ namespace intcode_computer
                 outputValue = SetOutputValue();
                 outputCodes = AddOutputCode();
             }
-            public int MovePointer()
+            public virtual int MovePointer()
             {
-                if (!nextPointerLocation.HasValue)
-                {
-                    var outputLocation = programAsList[currentPointerLocation + parameterCount];
-                    if (outputValue.HasValue) programAsList[outputLocation] = (int)outputValue;       
-                    return currentPointerLocation + parameterCount + 1; 
-                }
-                else
-                {
-                    return (int)nextPointerLocation;
-                }
+                var outputLocation = programAsList[currentPointerLocation + parameterCount];
+                programAsList[outputLocation] = (int)outputValue;       
+                return currentPointerLocation + parameterCount + 1;
             }
             private List<int> SetParameterTypes()
             {
@@ -165,6 +156,10 @@ namespace intcode_computer
         {
             public Output(int currentCode, int currentnextPointerLocation, List<int> programAsList, List<int> outputCodes, int valueForOutputOp) : base(currentCode, currentnextPointerLocation, programAsList, outputCodes, valueForOutputOp) {}
             public override int parameterCount => 1;
+            public override int MovePointer()
+            {     
+                return currentPointerLocation + parameterCount + 1;
+            }
             public override List<int> AddOutputCode()
             {
                 var finaloutputCodes = outputCodes;
@@ -176,6 +171,10 @@ namespace intcode_computer
         {
             public JumpIfTrue(int currentCode, int currentnextPointerLocation, List<int> programAsList, List<int> outputCodes, int valueForOutputOp) : base(currentCode, currentnextPointerLocation, programAsList, outputCodes, valueForOutputOp) {}
             public override int parameterCount => 2;
+            public override int MovePointer()
+            {
+                return !nextPointerLocation.HasValue ? currentPointerLocation + parameterCount + 1 : (int)nextPointerLocation;
+            }
             public override int? SetNextPointerLocation()
             {
                 if (parameterValues[0] != 0) return parameterValues[1];
@@ -186,6 +185,10 @@ namespace intcode_computer
         {
             public JumpIfFalse(int currentCode, int currentnextPointerLocation, List<int> programAsList, List<int> outputCodes, int valueForOutputOp) : base(currentCode, currentnextPointerLocation, programAsList, outputCodes, valueForOutputOp) {}
             public override int parameterCount => 2;
+            public override int MovePointer()
+            {
+                return !nextPointerLocation.HasValue ? currentPointerLocation + parameterCount + 1 : (int)nextPointerLocation;
+            }
             public override int? SetNextPointerLocation()
             {
                 if (parameterValues[0] == 0) return parameterValues[1];
