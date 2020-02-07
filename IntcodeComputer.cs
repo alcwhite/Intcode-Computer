@@ -11,7 +11,7 @@ namespace intcode_computer
             var programAsList = ConvertProgramStringToList(input);
             var outputCodes = new List<int>();
             int currentCode = programAsList[0];
-            var currentOpCode = GetOpCode(currentCode, currentCode.ToString());
+            var currentOpCode = GetOpCode(currentCode);
             int currentIndex = 0;
             while (currentOpCode != 99)
             {
@@ -33,7 +33,7 @@ namespace intcode_computer
                 }
                 
                 currentCode = programAsList[currentIndex];
-                currentOpCode = GetOpCode(currentCode, currentCode.ToString());  
+                currentOpCode = GetOpCode(currentCode);  
             }
             return (programAsList, outputCodes);
         }
@@ -69,8 +69,9 @@ namespace intcode_computer
             var stringList = input.Split(',').ToList();
             return stringList.Select(x => int.Parse(x.Trim())).ToList();
         }
-        private static int GetOpCode(int currentCode, string codeString)
+        private static int GetOpCode(int currentCode)
         {
+            var codeString = currentCode.ToString();
             return (codeString.Length < 3 ? currentCode : 
                     int.Parse(codeString.Substring(codeString.Length - 2)));
         }
